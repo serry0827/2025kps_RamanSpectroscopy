@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+
+# Path to the uploaded file
+file_paths = {
+    r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\mos2 1 raman.txt.": "mos2_1",
+    r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\mos2 2 raman.txt": "mos2_2",
+    r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\ws2 1 raman.txt": "ws2_1",
+    r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\ws2 2 raman.txt": "ws2_2"
+}
+output_folder = r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\spectroscopy\raman_graphs"
+os.makedirs(output_folder, exist_ok=True)
+
+for file_path, lable in file_paths.items():
+    # Step 1: Read the file, skipping lines until 'XYDATA='
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    # Step 2: Extract only the lines after 'XYDATA='
+    start_index = next(i for i, line in enumerate(lines) if 'XYDATA=' in line) + 1
+    data_lines = lines[start_index:]
+
+    # Step 3: Convert to DataFrame
+    data = [line.strip().split(',') for line in data_lines if ',' in line]
+    df = pd.DataFrame(data, columns=['Raman Shift (cm⁻¹)', 'Intensity']).astype(float)
+
+    # Step 4: Plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['Raman Shift (cm⁻¹)'], df['Intensity'], color='black', linewidth=1)
+
+    plt.title(f"Raman Spectrum - {lable.replace('_', ' ').upper()}")
+    plt.xlabel("Raman Shift (cm⁻¹)")
+    plt.ylabel("Intensity (a.u.)")
+    plt.grid(True)
+    plt.tight_layout()
+    
+    plt.xlim(320, 550)
+    plt.ylim(0, 12000)
+
+    # Save or display
+    save_path = os.path.join(output_folder, f"{lable}.png")
+    plt.savefig(save_path, dpi=300, bbox_inches= 'tight')
+    plt.show()
+
+print ("done")
