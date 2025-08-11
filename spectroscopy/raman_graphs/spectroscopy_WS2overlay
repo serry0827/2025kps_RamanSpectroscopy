@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+
+# --- paths (fixed the extra dot on the first one) ---
+mos2_1_path = r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\ws2 1 raman.txt"
+mos2_2_path = r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\experimental data\ws2 2 raman.txt"
+
+output_folder = r"C:\Users\serry\Documents\GitHub\2025kps_RamanSpectroscopy\spectroscopy\raman_graphs"
+os.makedirs(output_folder, exist_ok=True)
+
+def load_xydata_after_tag(path, tag="XYDATA="):
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    start_index = next(i for i, line in enumerate(lines) if tag in line) + 1
+    data_lines = lines[start_index:]
+    data = [line.strip().split(",") for line in data_lines if "," in line]
+    df = pd.DataFrame(data, columns=["Raman Shift (cm⁻¹)", "Intensity"]).astype(float)
+    return df
+
+# Load both files
+df1 = load_xydata_after_tag(mos2_1_path)
+df2 = load_xydata_after_tag(mos2_2_path)
+
+# --- Plot both on one figure with different colors & legend ---
+plt.figure(figsize=(10, 6))
+plt.plot(df1["Raman Shift (cm⁻¹)"], df1["Intensity"], label="MoS₂-1", linewidth=2)
+plt.plot(df2["Raman Shift (cm⁻¹)"], df2["Intensity"], label="MoS₂-2", linewidth=2)
+
+plt.title("Raman Spectrum - MoS₂ (Overlaid)")
+            # adjust as you like
+plt.xlabel("Raman Shift (cm⁻¹)")
+plt.ylabel("Intensity (a.u.)")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+
+# Optional fixed window (your previous zoom):
+plt.xlim(320, 550)
+plt.ylim(0, 12000)
+
+save_path = os.path.join(output_folder, "ws2_overlay.png")
+plt.savefig(save_path, dpi=300, bbox_inches="tight")
+plt.show()
+
+print("saved:", save_path)
